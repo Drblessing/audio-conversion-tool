@@ -23,6 +23,19 @@ cd audio-conversion-tool
 pip install -r requirements.txt
 ```
 
+Your enviornment also needs to have ffmpeg installed. You can install it using the following commands:
+
+```bash
+# For Ubuntu
+sudo apt-get install ffmpeg
+
+# For MacOS
+brew install ffmpeg
+
+# For Windows
+# Download the ffmpeg installer from https://ffmpeg.org/download.html
+```
+
 ## Usage
 
 Here's a quick example to convert an audio file:
