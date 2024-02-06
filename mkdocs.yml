@@ -3,6 +3,7 @@ site_url: https://example.com/
 nav:
   - Home: index.md
   - About: about.md
+  - Post1: post1.md
 theme: material
 plugins:
   - blog
