@@ -58,6 +58,7 @@ def flac_to_mp3(flac_file: Path | str, genre: str) -> None:
     set_genre_mp3(output_file, genre)
     custom_metadata_fixes_mp3(output_file)
     delete_album_artist_mp3(output_file)
+    fix_artist_metadata_mp3(output_file)
 
 
 def fix_textframe_metadata_mp3(file_path: Path | str):
@@ -96,6 +97,27 @@ def delete_album_artist_mp3(file_path: Path | str):
     audiofile.save()
 
 
+def fix_artist_metadata_mp3(file_path: Path | str):
+    """Fix the artist metadata of an mp3 file.
+    If the artist is <name 1>;<name 2>, it will be changed to <name1>.
+    """
+
+    # Get the flac file as a Path object
+    file_path = Path(file_path)
+    # Load the mp3 file
+    audiofile = MP3(file_path, ID3=ID3)
+
+    # Get the artist
+    artist = audiofile.tags.get("TPE1").text[0]
+
+    # If the artist is <name 1>;<name 2>, change it to <name 1>
+    if ";" in artist:
+        artist = artist.split(";")[0]
+        audiofile.tags.add(TPE1(encoding=3, text=artist))
+
+    audiofile.save()
+
+
 def set_genre_mp3(file_path: Path | str, genre: str):
     """Set the genre of an mp3 file."""
     # Get the flac file as a Path object
@@ -116,7 +138,7 @@ def convert_flac_album_to_mp3(file_path: Path | str, genre: str):
     The flac metadata will be copied to the mp3 file, as well.
     The mp3 metadta will be cleaned up, and the genre set to the genre of the album.
     The song names will be cleaned up, to format <track number>. <artist> - <song name>.mp3
-    The album name will also be cleaned up to <artist> - <album name>
+    The album name will also be cleaned up to <album name>
     """
 
     # Fix album name
@@ -126,6 +148,10 @@ def convert_flac_album_to_mp3(file_path: Path | str, genre: str):
     album_name = album_path.name
     # Remove brackets
     album_name = re.sub(r"\[.*?\]", "", album_name)
+    # Strip whitespace
+    album_name = album_name.strip()
+    # Split album name by " - "
+    album_name = album_name.split(" - ")[1]
     # Strip whitespace
     album_name = album_name.strip()
     # Get new album path
@@ -163,5 +189,5 @@ def custom_metadata_fixes_mp3(file_path: Path | str):
 
 
 if __name__ == "__main__":
-    test_album = ""
-    convert_flac_album_to_mp3(test_album, "Reggae")
+    test_album = ()
+    convert_flac_album_to_mp3(test_album, "Rap")
