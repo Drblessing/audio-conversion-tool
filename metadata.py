@@ -47,8 +47,4 @@ def set_song_title(file_path: Path, title: str):
 
 
 if __name__ == "__main__":
-    album_path = 
 
-    songs = get_songs_from_album(album_path)
-    for song in songs:
-        set_song_genre(song, "Reggae")
