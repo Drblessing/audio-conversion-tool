@@ -4,7 +4,7 @@ from pathlib import Path
 import ffmpeg
 import re
 import eyed3
-from mutagen.id3 import ID3, TXXX, TCON
+from mutagen.id3 import ID3, TXXX, TCON, TPE1
 from mutagen.mp3 import MP3
 import os
 import sys
@@ -56,6 +56,8 @@ def flac_to_mp3(flac_file: Path | str, genre: str) -> None:
 
     fix_textframe_metadata_mp3(output_file)
     set_genre_mp3(output_file, genre)
+    custom_metadata_fixes_mp3(output_file)
+    delete_album_artist_mp3(output_file)
 
 
 def fix_textframe_metadata_mp3(file_path: Path | str):
@@ -77,6 +79,19 @@ def fix_textframe_metadata_mp3(file_path: Path | str):
     for frame in txxx_frames_to_remove:
         if frame != "TXXX:USLT":
             del audiofile.tags[frame]
+
+    audiofile.save()
+
+
+def delete_album_artist_mp3(file_path: Path | str):
+    """Album artist is a useless tag, delete it."""
+    # Get the flac file as a Path object
+    file_path = Path(file_path)
+    # Load the mp3 file
+    audiofile = MP3(file_path, ID3=ID3)
+
+    # Delete album artist
+    audiofile.tags.delall("TPE2")
 
     audiofile.save()
 
@@ -128,6 +143,25 @@ def convert_flac_album_to_mp3(file_path: Path | str, genre: str):
         flac_file.unlink()
 
 
+def custom_metadata_fixes_mp3(file_path: Path | str):
+    """Apply custom metadata fixes to an mp3 file, for edge cases.
+    For example, always replace "Bob Marley" with "Bob Marley & The Wailers" in the artist field.
+    """
+    # Get the flac file as a Path object
+    file_path = Path(file_path)
+    # Load the mp3 file
+    audiofile = MP3(file_path, ID3=ID3)
+
+    # Get the artist
+    artist = audiofile.tags.get("TPE1").text[0]
+
+    # You're welcome Wailers
+    if artist == "Bob Marley":
+        audiofile.tags.add(TPE1(encoding=3, text="Bob Marley & The Wailers"))
+
+    audiofile.save()
+
+
 if __name__ == "__main__":
-    # test_album = ""
-    # convert_flac_album_to_mp3(test_album)
+    test_album = ""
+    convert_flac_album_to_mp3(test_album, "Reggae")
