@@ -1,3 +1,4 @@
 mutagen
 pydub
 eyed3
+ffmpeg-python
