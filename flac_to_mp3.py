@@ -188,6 +188,31 @@ def custom_metadata_fixes_mp3(file_path: Path | str):
     audiofile.save()
 
 
+def set_genre_for_album_mp3(file_path: Path | str, genre: str):
+    """A utility function for setting the mp3 genre for an album."""
+
+    # Get album path
+    album_path = Path(file_path)
+    # Get all mp3 files in the album
+    mp3_files = [mp3_file for mp3_file in album_path.glob("*.mp3")]
+    for mp3_file in mp3_files:
+        set_genre_mp3(mp3_file, genre)
+
+
+def set_genre_for_artist_directory(file_path: Path | str, genre: str):
+    """For a directory of artist albums, set the genre for all albums."""
+    # Get artist path
+    artist_path = Path(file_path)
+    # Get all album directories in the artist directory
+    album_dirs = [
+        album_dir for album_dir in artist_path.iterdir() if album_dir.is_dir()
+    ]
+    for album_dir in album_dirs:
+        print(f"Setting genre for album {album_dir.name}")
+        set_genre_for_album_mp3(album_dir, genre)
+
+
 if __name__ == "__main__":
-    test_album = ()
-    convert_flac_album_to_mp3(test_album, "Rap")
+    test_album = "/Users/dbless/Library/Mobile Documents/com~apple~CloudDocs/Music/Music Library/Bob Marley & The Wailers"
+    genre = "Reggae"
+    set_genre_for_artist_directory(test_album, genre)
