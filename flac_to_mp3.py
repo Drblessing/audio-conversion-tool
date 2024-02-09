@@ -213,6 +213,6 @@ def set_genre_for_artist_directory(file_path: Path | str, genre: str):
 
 
 if __name__ == "__main__":
-    test_album = "/Users/dbless/Library/Mobile Documents/com~apple~CloudDocs/Music/Music Library/Bob Marley & The Wailers"
-    genre = "Reggae"
+    test_album = ""
+    genre = ""
     set_genre_for_artist_directory(test_album, genre)
