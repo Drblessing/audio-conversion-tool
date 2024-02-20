@@ -214,5 +214,5 @@ def set_genre_for_artist_directory(file_path: Path | str, genre: str):
 
 if __name__ == "__main__":
     test_album = "a"
-    genre = ""
+    genre = "a"
     set_genre_for_artist_directory(test_album, genre)
