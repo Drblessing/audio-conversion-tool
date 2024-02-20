@@ -4,7 +4,7 @@ from pathlib import Path
 import ffmpeg
 import re
 import eyed3
-from mutagen.id3 import ID3, TXXX, TCON, TPE1
+from mutagen.id3 import ID3, TXXX, TCON, TPE1, TALB, APIC
 from mutagen.mp3 import MP3
 import os
 import sys
@@ -118,6 +118,40 @@ def fix_artist_metadata_mp3(file_path: Path | str):
     audiofile.save()
 
 
+def set_artist_mp3(file_path: Path | str, artist: str):
+    """Set the artist of an mp3 file."""
+    # Get the flac file as a Path object
+    file_path = Path(file_path)
+    # Load the mp3 file
+    audiofile = MP3(file_path, ID3=ID3)
+
+    # Set the artist
+    audiofile.tags.add(TPE1(encoding=3, text=artist))
+
+    audiofile.save()
+
+
+def set_album_art_mp3(file_path: Path | str, album_art: str = "cover.jpg"):
+    """Set the album art of an mp3 file."""
+    # Get the flac file as a Path object
+    file_path = Path(file_path)
+    # Load the mp3 file
+    audiofile = MP3(file_path, ID3=ID3)
+
+    # Set the album art
+    audiofile.tags.add(
+        APIC(
+            encoding=3,
+            mime="image/jpeg",
+            type=3,
+            desc="Cover",
+            data=open(album_art, "rb").read(),
+        )
+    )
+
+    audiofile.save()
+
+
 def set_genre_mp3(file_path: Path | str, genre: str):
     """Set the genre of an mp3 file."""
     # Get the flac file as a Path object
@@ -127,6 +161,19 @@ def set_genre_mp3(file_path: Path | str, genre: str):
 
     # Set the genre
     audiofile.tags.add(TCON(encoding=3, text=genre))
+
+    audiofile.save()
+
+
+def set_album_mp3(file_path: Path | str, album: str):
+    """Set the album of an mp3 file."""
+    # Get the flac file as a Path object
+    file_path = Path(file_path)
+    # Load the mp3 file
+    audiofile = MP3(file_path, ID3=ID3)
+
+    # Set the album
+    audiofile.tags.add(TALB(encoding=3, text=album))
 
     audiofile.save()
 
@@ -211,54 +258,40 @@ def set_genre_for_artist_directory(file_path: Path | str, genre: str):
         print(f"Setting genre for album {album_dir.name}")
         set_genre_for_album_mp3(album_dir, genre)
 
-def organize_playlist_into_album(file_path: Path | str, playlist_artist: str = "Various Artists",playlist_name : str, album_name : str, genre : str = "Various", album_art :str = 'cover.jpg'):
-    """Organize a playlist into an album.
-    This will convert all flac files in the directory to mp3.
-    The bitrate is set to 320 kbps.
-    The flac metadata will be copied to the mp3 file, as well.
-    The mp3 metadta will be cleaned up, and the genre set to the genre of the album.
-    The song names will be cleaned up, to format <track number>. <artist> - <song name>.mp3
-    The album name will also be cleaned up to <album name>
+
+def organize_mp3_playlist_into_album(
+    file_path: Path | str,
+    album_name: str,
+    playlist_artist: str = "Various Artists",
+    genre: str = "Various",
+    album_art: str = "cover.jpg",
+):
+    """Organize an mp3 playlist into an album.
+    Set all the artist names to the playlist artist.
+    Set the album name to album_name.
+    Sets the cover art to album_art,
+    and the genre to genre.
+    Useful for organizing a playlist into an album,
+    like a classical music playlist.
     """
 
-    # Fix album name
-    # Get album path
-    album_path = Path(file_path)
-    # Get album name
-    album_name = album_path.name
-    # Remove brackets
-    album_name = re.sub(r"\[.*?\]", "", album_name)
-    # Strip whitespace
-    album_name = album_name.strip()
-    # Split album name by " - "
-    album_name = album_name.split(" - ")[1]
-    # Strip whitespace
-    album_name = album_name.strip()
-    # Get new album path
-    new_album_path = album_path.parent / album_name
-    # Move album to new path
-    album_path = album_path.rename(new_album_path)
-
-    # Convert all flac files to mp3
-    flac_files = [flac_file for flac_file in album_path.glob("*.flac")]
-    for flac_file in flac_files:
-        flac_to_mp3(flac_file, genre)
-
-    # Delete all flac files
-    for flac_file in flac_files:
-        flac_file.unlink()
-
-    # Set the album artist to Various Artists
-    album_path = Path(file_path)
-    # Get all mp3 files in the album
-    mp3_files = [mp3_file for mp3_file in album_path.glob("*.mp3")]
+    # Get playlist path
+    playlist_path = Path(file_path)
+    # Get all mp3 files in the playlist
+    mp3_files = [mp3_file for mp3_file in playlist_path.glob("*.mp3")]
     for mp3_file in mp3_files:
-        set_album_artist(mp3_file, playlist_artist)
-        set_album(mp3_file, album_name)
+        # Set the artist to the playlist artist
+        set_artist_mp3(mp3_file, playlist_artist)
         set_genre_mp3(mp3_file, genre)
-        set_playlist(mp3_file, playlist_name)
+        set_album_mp3(mp3_file, album_name)
+        set_album_art_mp3(mp3_file, album_art)
+
 
 if __name__ == "__main__":
-    test_album = "a"
-    genre = "a"
-    set_genre_for_artist_directory(test_album, genre)
+    organize_mp3_playlist_into_album(
+        "/Users/dbless/Downloads/Classical Playlist 1",
+        "Classical Playlist 1",
+        "Various Artists",
+        "Classical",
+        "cover.jpg",
+    )
