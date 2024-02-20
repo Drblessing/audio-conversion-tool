@@ -4,7 +4,7 @@ from pathlib import Path
 import ffmpeg
 import re
 import eyed3
-from mutagen.id3 import ID3, TXXX, TCON, TPE1, TALB, APIC
+from mutagen.id3 import ID3, TXXX, TCON, TPE1, TALB, APIC, USLT, TRCK
 from mutagen.mp3 import MP3
 import os
 import sys
@@ -131,12 +131,21 @@ def set_artist_mp3(file_path: Path | str, artist: str):
     audiofile.save()
 
 
-def set_album_art_mp3(file_path: Path | str, album_art: str = "cover.jpg"):
+def set_album_art_mp3(file_path: Path | str, album_art_path: str = "cover.jpg"):
     """Set the album art of an mp3 file."""
     # Get the flac file as a Path object
     file_path = Path(file_path)
     # Load the mp3 file
     audiofile = MP3(file_path, ID3=ID3)
+
+    # Remove current album art
+    audiofile.tags.delall("APIC")
+
+    # Get the album art path
+    album_art_path = Path(album_art_path)
+
+    with album_art_path.open("rb") as img_file:
+        img_data = img_file.read()
 
     # Set the album art
     audiofile.tags.add(
@@ -145,7 +154,7 @@ def set_album_art_mp3(file_path: Path | str, album_art: str = "cover.jpg"):
             mime="image/jpeg",
             type=3,
             desc="Cover",
-            data=open(album_art, "rb").read(),
+            data=img_data,
         )
     )
 
@@ -259,6 +268,19 @@ def set_genre_for_artist_directory(file_path: Path | str, genre: str):
         set_genre_for_album_mp3(album_dir, genre)
 
 
+def set_track_number_mp3(file_path: Path | str, track_number: int):
+    """Set the track number of an mp3 file."""
+    # Get the flac file as a Path object
+    file_path = Path(file_path)
+    # Load the mp3 file
+    audiofile = MP3(file_path, ID3=ID3)
+
+    # Set the track number
+    audiofile.tags.add(TRCK(encoding=3, text=str(track_number)))
+
+    audiofile.save()
+
+
 def organize_mp3_playlist_into_album(
     file_path: Path | str,
     album_name: str,
@@ -279,19 +301,30 @@ def organize_mp3_playlist_into_album(
     playlist_path = Path(file_path)
     # Get all mp3 files in the playlist
     mp3_files = [mp3_file for mp3_file in playlist_path.glob("*.mp3")]
+    tack_number = 1
     for mp3_file in mp3_files:
         # Set the artist to the playlist artist
         set_artist_mp3(mp3_file, playlist_artist)
         set_genre_mp3(mp3_file, genre)
         set_album_mp3(mp3_file, album_name)
         set_album_art_mp3(mp3_file, album_art)
+        set_track_number_mp3(mp3_file, tack_number)
+        # Rename the file to include the track number
+        # Get the song name
+        song_name = mp3_file.stem
+        # Replace current number
+        song_name = re.sub(r"^\d{1,2}\. ", "", song_name)
+        # Create file path for mp3
+        output_file = mp3_file.parent / f"{tack_number}. {song_name}.mp3"
+        mp3_file.rename(output_file)
+        tack_number += 1
 
 
 if __name__ == "__main__":
     organize_mp3_playlist_into_album(
-        "/Users/dbless/Downloads/Classical Playlist 1",
+        "/Users/dbless/Library/Mobile Documents/com~apple~CloudDocs/Music/Music Library/Various Artists/Classical Playlist 1",
         "Classical Playlist 1",
         "Various Artists",
         "Classical",
-        "cover.jpg",
+        "/Users/dbless/Library/Mobile Documents/com~apple~CloudDocs/Music/Music Library/Various Artists/Classical Playlist 1/cover.jpg",
     )
