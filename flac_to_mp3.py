@@ -68,7 +68,7 @@ def fix_textframe_metadata_mp3(file_path: Path | str):
     # Load the mp3 file
     audiofile = MP3(file_path, ID3=ID3)
 
-    # List of TXXX frames to remove
+    # List of TXXX frames to remove for organization.
     txxx_frames_to_remove = []
 
     # Identify all TXXX frames
