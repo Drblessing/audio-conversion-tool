@@ -322,9 +322,9 @@ def organize_mp3_playlist_into_album(
 
 if __name__ == "__main__":
     organize_mp3_playlist_into_album(
-        "/Users/dbless/Library/Mobile Documents/com~apple~CloudDocs/Music/Music Library/Various Artists/Classical Playlist 1",
-        "Classical Playlist 1",
+        "/Users/dbless/Downloads/Classical Playlist 2",
+        "Classical Playlist 2",
         "Various Artists",
         "Classical",
-        "/Users/dbless/Library/Mobile Documents/com~apple~CloudDocs/Music/Music Library/Various Artists/Classical Playlist 1/cover.jpg",
+        "/Users/dbless/Downloads/Classical Playlist 2/cover.jpg",
     )
