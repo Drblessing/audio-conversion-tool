@@ -314,7 +314,7 @@ def organize_mp3_playlist_into_album(
         song_name = mp3_file.stem
         # Replace current number
         song_name = re.sub(r"^\d{1,2}\. ", "", song_name)
-        # Create file path for mp3
+        # Create file path for mp3.
         output_file = mp3_file.parent / f"{tack_number}. {song_name}.mp3"
         mp3_file.rename(output_file)
         tack_number += 1
